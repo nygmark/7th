@@ -1,1 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy 7th Monthsary, baby!</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    overflow: hidden;
+    color: white;
+    background: black;
+  }
 
+  canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px white;
+  }
+
+  .playlist {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    max-width: 800px;
+    margin: auto;
+  }
+
+  .song-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid white;
+    border-radius: 15px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.3);
+    transition: transform 0.3s, box-shadow 0.3s;
+    backdrop-filter: blur(5px);
+  }
+
+  .song-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.5);
+  }
+
+  .song-card img {
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+
+  .player-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid white;
+    border-radius: 20px;
+    padding: 20px;
+    width: 320px;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.5);
+    display: none;
+    text-align: center;
+    backdrop-filter: blur(10px);
+  }
+
+  .player-modal img {
+    width: 100%;
+    border-radius: 10px;
+  }
+
+  .player-modal h2 {
+    margin: 10px 0 5px;
+  }
+
+  .player-modal h3 {
+    margin: 0 0 10px;
+    font-weight: normal;
+  }
+
+  .glass-player {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin-top: 10px;
+  }
+
+  .glass-player button {
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    padding: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .glass-player button:hover {
+    background: white;
+    color: black;
+  }
+
+  .glass-player input[type="range"] {
+    width: 60px;
+    accent-color: white;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+  }
+
+  .time-display {
+    font-size: 12px;
+    margin-left: 5px;
+  }
+
+  .message {
+    font-size: 14px;
+    color: white;
+    margin-top: 10px;
+  }
+
+  .close-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<h1>7 Songs That Remind Me of You</h1>
+<div class="playlist" id="playlist"></div>
+
+<div class="player-modal" id="playerModal">
+  <button class="close-btn" id="closeModal">✖</button>
+  <img id="modalCover" src="" alt="Cover">
+  <h2 id="modalTitle">Title</h2>
+  <h3 id="modalArtist">Artist</h3>
+
+  <audio id="modalAudio"></audio>
+
+  <div class="glass-player">
+    <button id="prev">«</button>
+    <button id="playPause">►</button>
+    <button id="next">»</button>
+    <input type="range" id="seekbar" value="0" min="0" step="1">
+    <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+    <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1">
+  </div>
+
+  <p class="message" id="modalMessage">Why this song reminds me of you…</p>
+</div>
+
+<script>
+// Moving stars background
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  stars = Array.from({ length: 100 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: Math.random() * 2,
+    speed: Math.random() * 0.5 + 0.2
+  }));
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(star => {
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    star.y += star.speed;
+    if (star.y > canvas.height) {
+      star.y = 0;
+      star.x = Math.random() * canvas.width;
+    }
+  });
+  requestAnimationFrame(animate);
+}
+
+resize();
+animate();
+window.addEventListener('resize', resize);
+
+// Song Player Logic
+const songs = [
+  { title: "Last Night on Earth", artist: "Greenday", message: "Our first date felt like a fairytale.", src: "/musics/Last Night on Earth.mp3", cover: "/img/greenday.jpg" },
+  { title: "Strawberry Swing", artist: "Coldplay", message: "Every moment with you feels timeless.", src: "/musics/Strawberry Swing.mp3", cover: "/img/coldplay.jpg" },
+  { title: "Champagne Supernova", artist: "Oasis", message: "It makes me think of slow dancing with you.", src: "/musics/champsuper.mp3", cover: "/img/oasis.jpg" },
+  { title: "No. 1 Party Anthem", artist: "Arctic Monkeys", message: "This song says exactly how I feel.", src: "/musics/no1.mp3", cover: "/img/am.jpeg" },
+  { title: "Moon River", artist: "Frank Ocean", message: "I want to love you until we're 70.", src: "/musics/Moon River.mp3", cover: "/img/moon river.jpeg" },
+  { title: "Wala Kang Katulad", artist: "Spongecola", message: "I'd wait a thousand years for you.", src: "/musics/Wala Kang Katulad.mp3", cover: "/img/katulad.jpg" },
+  { title: "Revvin' My Cj7", artist: "Summer Salt", message: "You're the reason I smile every day.", src: "/musics/revvin.mp3", cover: "/img/revvin.jpeg" }
+];
+
+const playlist = document.getElementById('playlist');
+const playerModal = document.getElementById('playerModal');
+const modalCover = document.getElementById('modalCover');
+const modalTitle = document.getElementById('modalTitle');
+const modalArtist = document.getElementById('modalArtist');
+const modalAudio = document.getElementById('modalAudio');
+const modalMessage = document.getElementById('modalMessage');
+const closeModal = document.getElementById('closeModal');
+const playPauseBtn = document.getElementById('playPause');
+const seekbar = document.getElementById('seekbar');
+const timeDisplay = document.getElementById('timeDisplay');
+const volumeControl = document.getElementById('volumeControl');
+
+let currentIndex = 0;
+
+songs.forEach((song, index) => {
+  const card = document.createElement('div');
+  card.classList.add('song-card');
+  card.innerHTML = `<img src="${song.cover}" alt="${song.title}"><div><strong>${song.title}</strong><br><small>${song.artist}</small></div>`;
+  card.addEventListener('click', () => openPlayer(index));
+  playlist.appendChild(card);
+});
+
+function openPlayer(index) {
+  currentIndex = index;
+  loadSong(index);
+  playerModal.style.display = 'block';
+}
+
+function loadSong(index) {
+  const song = songs[index];
+  modalCover.src = song.cover;
+  modalTitle.textContent = song.title;
+  modalArtist.textContent = song.artist;
+  modalMessage.textContent = song.message;
+  modalAudio.src = song.src;
+  playPauseBtn.textContent = '►';
+}
+
+function togglePlayPause() {
+  if (modalAudio.paused) {
+    modalAudio.play();
+    playPauseBtn.textContent = '❚❚';
+  } else {
+    modalAudio.pause();
+    playPauseBtn.textContent = '►';
+  }
+}
+
+function prevSong() {
+  currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+  loadSong(currentIndex);
+  modalAudio.play();
+  playPauseBtn.textContent = '❚❚';
+}
+
+function nextSong() {
+  currentIndex = (currentIndex + 1) % songs.length;
+  loadSong(currentIndex);
+  modalAudio.play();
+  playPauseBtn.textContent = '❚❚';
+}
+
+function updateSeekbar() {
+  seekbar.max = modalAudio.duration || 0;
+  seekbar.value = modalAudio.currentTime;
+  timeDisplay.textContent = formatTime(modalAudio.currentTime) + ' / ' + formatTime(modalAudio.duration);
+}
+
+function seekAudio() {
+  modalAudio.currentTime = seekbar.value;
+}
+
+function formatTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function changeVolume() {
+  modalAudio.volume = volumeControl.value;
+}
+
+modalAudio.addEventListener('timeupdate', updateSeekbar);
+seekbar.addEventListener('input', seekAudio);
+volumeControl.addEventListener('input', changeVolume);
+
+playPauseBtn.addEventListener('click', togglePlayPause);
+document.getElementById('prev').addEventListener('click', prevSong);
+document.getElementById('next').addEventListener('click', nextSong);
+closeModal.addEventListener('click', () => playerModal.style.display = 'none');
+</script>
+</body>
+</html>
